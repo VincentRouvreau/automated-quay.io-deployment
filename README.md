@@ -1,5 +1,6 @@
-Quay.io Deployment Tools
-========================
+*Note this is a fork from [automated-quay.io-deployment](https://github.com/lkiesow/automated-quay.io-deployment), but for GitHub actions.*
+
+# Quay.io Deployment Tools
 
 [Quay.io](https://quay.io) is a nice tool for automatically building and
 hosting your Docker containers. It supports [Github based build triggers
@@ -12,12 +13,12 @@ images get updated. This essentially means that unless you regularly push to
 your Dockerfile repository, your base images will never get updated.
 
 This repository contains a very minimal script to support a custom trigger
-using [Travis CI](https://travis-ci.com). Since Travis supports not only build
+using [GitHub actions](https://docs.github.com/en/free-pro-team@latest/actions/quickstart).
+Since GitHub actions supports not only build
 triggers but also cronjobs, this makes regular builds easy.
 
 
-Setting up Quay.io
-------------------
+## Setting up [Quay.io webhook](https://docs.quay.io/guides/custom-trigger.html)
 
 *Note that this will work for public repositories only.*
 
@@ -32,39 +33,30 @@ which you will need for Travis. The URL should look somewhat like this:
     https://$token:...@quay.io/webhooks/push/trigger/...
 
 
-Setting up Travis CI
---------------------
+## Setting up GitHub actions
 
-Start by enabling Travis CI for your repository as usual. Then go into your
-repository settings on Travis and add an environment variable called
-`QUAY_WEBHOOK_URL` containing the Quay Webhook Endpoint URL you received
-earlier.
+Go into your repository settings on GitHub, go to the “Secrets” section
+and add an environment secrets, name it.
+In “Environment secrets”, add a secret variable called `QUAY_WEBHOOK_URL`
+containing the Quay Webhook Endpoint URL you received earlier.
 
-Then add a `.travis.yml` build configuration file like this to your repository:
+Enable GitHub actions for your repository, by adding a
+`.github/workflows/*.yml` file in your repository:
 
 ```yaml
-sudo: false
-script:
-  - curl -s https://raw.githubusercontent.com/lkiesow/automated-quay.io-deployment/master/deploy-on-quay | sh
+run: |
+  curl -s https://raw.githubusercontent.com/VincentRouvreau/automated-quay.io-deployment/master/deploy-on-quay | sh
 ```
 
 
 This will let you build fail if the deployment to quay did not work. If you
 want this to fail silently instead (e.g. to not disrupt development), you can
-use [Travis script deployment
-](https://docs.travis-ci.com/user/deployment/script) instead:
+download the script instead:
 
 ```yaml
-sudo: false
-install:
-  - curl -O https://raw.githubusercontent.com/lkiesow/automated-quay.io-deployment/master/deploy-on-quay
-script:
-  - true
-deploy:
-  provider: script
-  script: sh deploy-on-quay
-  on:
-    branch: master
+run: |
+  curl -O https://raw.githubusercontent.com/VincentRouvreau/automated-quay.io-deployment/master/deploy-on-quay
+  sh deploy-on-quay || true
 ```
 
 Additionally, you can set the Quay.io default branch by setting the
@@ -80,9 +72,8 @@ Travis and add a cron job to rebuild the containers on a daily, weekly or
 monthly basis.
 
 
-A Note About Security
----------------------
+## A Note About Security
 
-Instead of loading the script from a foreign repository and just execute it it
+Instead of loading the script from a foreign repository and just execute it, it
 is obviously possible to directly include this script in the Dockerfile
 repository instead.

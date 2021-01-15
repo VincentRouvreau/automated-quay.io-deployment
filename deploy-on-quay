@@ -4,12 +4,16 @@
 # https://github.com/lkiesow/automated-quay.io-deployment
 # Licensed under the terms of the MIT License.
 # See LICENSE for more details.
+#
+# Modification:
+#     Vincent Rouvreau - make it work with github actions
+#     cf. https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables
 
 set -ue
 
 payload="{
-  \"commit\": \"${TRAVIS_COMMIT}\",
-  \"ref\": \"refs/heads/${TRAVIS_BRANCH}\",
+  \"commit\": \"${GITHUB_SHA}\",
+  \"ref\": \"${GITHUB_REF}\",
   \"default_branch\": \"${QUAY_DEFAULT_BRANCH:-master}\"
 }"
 

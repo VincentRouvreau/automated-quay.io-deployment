@@ -36,16 +36,22 @@ which you will need for Travis. The URL should look somewhat like this:
 ## Setting up GitHub actions
 
 Go into your repository settings on GitHub, go to the “Secrets” section
-and add an environment secrets, name it.
-In “Environment secrets”, add a secret variable called `QUAY_WEBHOOK_URL`
+and add a secret using ”New repository secret” called `QUAY_WEBHOOK_URL`
 containing the Quay Webhook Endpoint URL you received earlier.
 
 Enable GitHub actions for your repository, by adding a
 `.github/workflows/*.yml` file in your repository:
 
 ```yaml
-run: |
-  curl -s https://raw.githubusercontent.com/VincentRouvreau/automated-quay.io-deployment/master/deploy-on-quay | sh
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      QUAY_WEBHOOK_URL: ${{ secrets.QUAY_WEBHOOK_URL }}
+    steps:
+      - name: Webhook on quay.io
+        run: |
+          curl -s https://raw.githubusercontent.com/VincentRouvreau/automated-quay.io-deployment/master/deploy-on-quay | sh
 ```
 
 
